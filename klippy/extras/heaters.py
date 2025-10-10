@@ -13,6 +13,7 @@ from .control_mpc import (
     FILAMENT_TEMP_SRC_FIXED,
     FILAMENT_TEMP_SRC_SENSOR,
 )
+from ._dummy_heater import DummyHeater
 
 
 ######################################################################
@@ -1012,7 +1013,63 @@ class PrinterHeaters:
         # Setup sensor
         sensor = self.setup_sensor(config)
         # Create heater
+
+        # Create heater
+
+
+
+                # Create heater
+
+        # Compute heater_name once for both paths
+        heater_name = config.get_name().split()[0]
+
+        # Allow specific heaters (e.g. 'extruder') to run without a real heater pin
+        # when the config explicitly requests it. This bypasses PWM allocation.
+        if config.getboolean("ignore_heater_pin", False):
+            heater = DummyHeater(config.get_printer(), heater_name)
+            self.heaters[heater_name] = heater
+            # keep behavior consistent with real heaters: expose in list
+            self.available_heaters.append(config.get_name())
+            return heater
+
+        # Normal path: build a real heater (allocates PWM)
+ (allocates PWM)
+
         self.heaters[heater_name] = heater = Heater(config, sensor)
+
+        self.register_sensor(config, heater, gcode_id)
+
+        self.available_heaters.append(config.get_name())
+
+        return heater
+        # when the config explicitly requests it. This bypasses PWM allocation.
+
+        if config.getboolean("ignore_heater_pin", False):
+
+            heater = DummyHeater(config.get_printer(), heater_name)
+        self.printer.log_info(f"Heater {heater_name}: using DummyHeater (ignore_heater_pin=True)")
+        self.printer.log_info(f"Heater {heater_name}: using DummyHeater (ignore_heater_pin=True)")
+        self.printer.log_info(f"Heater {heater_name}: using DummyHeater (ignore_heater_pin=True)")
+
+            self.heaters[heater_name] = heater
+
+            # keep behavior consistent with real heaters: expose in list
+
+            self.available_heaters.append(config.get_name())
+
+            return heater
+
+
+
+        # Normal path: build a real heater (allocates PWM)
+
+        self.heaters[heater_name] = heater = Heater(config, sensor)
+
+        self.register_sensor(config, heater, gcode_id)
+
+        self.available_heaters.append(config.get_name())
+
+        return heater
         self.register_sensor(config, heater, gcode_id)
         self.available_heaters.append(config.get_name())
         return heater
