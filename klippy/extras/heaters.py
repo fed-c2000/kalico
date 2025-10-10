@@ -1010,66 +1010,20 @@ class PrinterHeaters:
         heater_name = config.get_name().split()[-1]
         if heater_name in self.heaters:
             raise config.error("Heater %s already registered" % (heater_name,))
-        # Setup sensor
+
+        ignore_heater_pin = config.getboolean("ignore_heater_pin", False)
         sensor = self.setup_sensor(config)
-        # Create heater
 
-        # Create heater
+        if ignore_heater_pin:
+            heater = DummyHeater(config, sensor)
+            logging.info(
+                "Heater %s: using DummyHeater (ignore_heater_pin=True)",
+                heater_name,
+            )
+        else:
+            heater = Heater(config, sensor)
 
-
-
-                # Create heater
-
-        # Compute heater_name once for both paths
-        heater_name = config.get_name().split()[0]
-
-        # Allow specific heaters (e.g. 'extruder') to run without a real heater pin
-        # when the config explicitly requests it. This bypasses PWM allocation.
-        if config.getboolean("ignore_heater_pin", False):
-            heater = DummyHeater(config.get_printer(), heater_name)
-            self.heaters[heater_name] = heater
-            # keep behavior consistent with real heaters: expose in list
-            self.available_heaters.append(config.get_name())
-            return heater
-
-        # Normal path: build a real heater (allocates PWM)
- (allocates PWM)
-
-        self.heaters[heater_name] = heater = Heater(config, sensor)
-
-        self.register_sensor(config, heater, gcode_id)
-
-        self.available_heaters.append(config.get_name())
-
-        return heater
-        # when the config explicitly requests it. This bypasses PWM allocation.
-
-        if config.getboolean("ignore_heater_pin", False):
-
-            heater = DummyHeater(config.get_printer(), heater_name)
-        self.printer.log_info(f"Heater {heater_name}: using DummyHeater (ignore_heater_pin=True)")
-        self.printer.log_info(f"Heater {heater_name}: using DummyHeater (ignore_heater_pin=True)")
-        self.printer.log_info(f"Heater {heater_name}: using DummyHeater (ignore_heater_pin=True)")
-
-            self.heaters[heater_name] = heater
-
-            # keep behavior consistent with real heaters: expose in list
-
-            self.available_heaters.append(config.get_name())
-
-            return heater
-
-
-
-        # Normal path: build a real heater (allocates PWM)
-
-        self.heaters[heater_name] = heater = Heater(config, sensor)
-
-        self.register_sensor(config, heater, gcode_id)
-
-        self.available_heaters.append(config.get_name())
-
-        return heater
+        self.heaters[heater_name] = heater
         self.register_sensor(config, heater, gcode_id)
         self.available_heaters.append(config.get_name())
         return heater
