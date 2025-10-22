@@ -573,8 +573,20 @@ class MCU_pwm:
         self._last_clock = self._mcu.print_time_to_clock(printtime + 0.200)
         cycle_ticks = self._mcu.seconds_to_clock(self._cycle_time)
         mdur_ticks = self._mcu.seconds_to_clock(self._max_duration)
+        max_pwm_ticks = (1 << 31) - 1
         if mdur_ticks >= 1 << 31:
-            raise pins.error("PWM pin max duration too large")
+            mcu_freq = max(self._mcu.seconds_to_clock(1.0), 1)
+            safe_duration = max_pwm_ticks / float(mcu_freq)
+            logging.warning(
+                "PWM max duration %.3fs too large for MCU '%s' (freq %.0fHz);"
+                " clamping to %.3fs",
+                self._max_duration,
+                self._mcu.get_name(),
+                float(mcu_freq),
+                safe_duration,
+            )
+            mdur_ticks = max_pwm_ticks
+            self._max_duration = safe_duration
         if self._hardware_pwm:
             self._pwm_max = self._mcu.get_constant_float("PWM_MAX")
             self._mcu.request_move_queue_slot()
